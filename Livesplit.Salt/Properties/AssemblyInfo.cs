@@ -13,6 +13,6 @@ using LiveSplit.UI.Components;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("7ca19d1e-048e-4883-8526-90fde279573b")]
-[assembly: AssemblyVersion("0.0.1")]
-[assembly: AssemblyFileVersion("0.0.1")]
+[assembly: AssemblyVersion("0.0.2")]
+[assembly: AssemblyFileVersion("0.0.2")]
 [assembly: ComponentFactory(typeof(SaltFactory))]

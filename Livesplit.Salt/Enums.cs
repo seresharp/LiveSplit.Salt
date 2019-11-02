@@ -64,4 +64,10 @@ namespace LiveSplit.Salt
         Loading,
         Credits
     }
+
+    public enum EnemyType
+    {
+        Unknown,
+        Leviathon = 32 // [sic]
+    }
 }

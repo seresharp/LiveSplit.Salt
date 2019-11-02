@@ -57,6 +57,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnemyHealthTracker.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="InvLoot.cs" />
     <Compile Include="ProcessExtensions.cs" />
@@ -69,7 +70,12 @@
     <Compile Include="Test.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Updates.xml" />
+    <None Include="Components\LiveSplit.Salt.Updates.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>cd "$(OutDir)"
+copy /Y "$(TargetFileName)" "$(ProjectDir)Components\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
 using LiveSplit.Model;
@@ -23,6 +24,7 @@ namespace LiveSplit.Salt
         private readonly SaltMemory _mem;
 
         private readonly Dictionary<string, InvLoot> _bossItems = new Dictionary<string, InvLoot>();
+        private readonly List<EnemyHealthTracker> _enemyTrackers = new List<EnemyHealthTracker>();
 
         public string ComponentName { get; }
 
@@ -64,7 +66,23 @@ namespace LiveSplit.Salt
                 return;
             }
 
-            CheckBossKills();
+            CheckItemSplits();
+
+            // TODO: Generic enemy kill split system
+            // Unspeakable Deep
+            int len = _mem.GetCharCount();
+            for (int i = 0; i < len; i++)
+            {
+                if (_mem.GetCharType(i) != EnemyType.Leviathon || _mem.GetCharHealth(i) <= 0f ||
+                    _enemyTrackers.Any(tracker => tracker.CharType == EnemyType.Leviathon))
+                {
+                    continue;
+                }
+
+                _enemyTrackers.Add(new EnemyHealthTracker(_mem, i));
+            }
+
+            CheckCharKills();
 
             if (_model.CurrentState.CurrentSplitIndex == _model.CurrentState.Run.Count - 1 && _mem.IsGameEnding())
             {
@@ -81,8 +99,9 @@ namespace LiveSplit.Salt
             }
         }
 
-        private void CheckBossKills()
+        private void CheckItemSplits()
         {
+            // Boss items
             foreach (string itemName in BossItemNames)
             {
                 // Skipping nameless for now, will add back in after I make config
@@ -106,9 +125,24 @@ namespace LiveSplit.Salt
             }
         }
 
+        private void CheckCharKills()
+        {
+            foreach (EnemyHealthTracker tracker in _enemyTrackers)
+            {
+                tracker.Update();
+                if (tracker.ShouldSplit)
+                {
+                    _model.Split();
+                }
+            }
+
+            _enemyTrackers.RemoveAll(tracker => tracker.Done);
+        }
+
         private void TimerStart(object sender, EventArgs e)
         {
             _bossItems.Clear();
+            _enemyTrackers.Clear();
         }
 
         public Control GetSettingsControl(LayoutMode mode)

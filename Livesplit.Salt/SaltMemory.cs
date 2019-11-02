@@ -56,14 +56,6 @@ namespace LiveSplit.Salt
             return _players.Read<int>(Program, 0x4);
         }
 
-        private void CheckPlayerIndex(int player)
-        {
-            if (player < 0 || player >= GetPlayerCount())
-            {
-                throw new ArgumentOutOfRangeException(nameof(player), player, "Invalid player index");
-            }
-        }
-
         public MenuLevel GetMenuLevel(int player)
         {
             CheckPlayerIndex(player);
@@ -152,6 +144,44 @@ namespace LiveSplit.Salt
         public GameState GetGameState()
         {
             return (GameState) _gameState.Read<int>(Program, 0x0);
+        }
+
+        public int GetCharCount()
+        {
+            // CharMgr.character.Length
+            return _characters.Read<int>(Program, 0x4);
+        }
+
+        public EnemyType GetCharType(int ch)
+        {
+            CheckCharIndex(ch);
+
+            // CharMgr.character[ch].monsterIdx
+            return (EnemyType) _characters.Read<int>(Program, 0x8 + sizeof(uint) * ch, 0x5C);
+        }
+
+        public float GetCharHealth(int ch)
+        {
+            CheckCharIndex(ch);
+
+            // CharMgr.character[ch].hp
+            return _characters.Read<float>(Program, 0x8 + sizeof(uint) * ch, 0x60);
+        }
+
+        private void CheckPlayerIndex(int player)
+        {
+            if (player < 0 || player >= GetPlayerCount())
+            {
+                throw new ArgumentOutOfRangeException(nameof(player), player, "Invalid player index");
+            }
+        }
+
+        private void CheckCharIndex(int ch)
+        {
+            if (ch < 0 || ch >= GetCharCount())
+            {
+                throw new ArgumentOutOfRangeException(nameof(ch), ch, "Invalid character index");
+            }
         }
 
         public void Dispose()

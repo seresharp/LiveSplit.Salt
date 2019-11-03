@@ -22,9 +22,12 @@ namespace LiveSplit.Salt
 
         private readonly TimerModel _model;
         private readonly SaltMemory _mem;
+        private readonly Settings _settings = new Settings();
 
         private readonly Dictionary<string, InvLoot> _bossItems = new Dictionary<string, InvLoot>();
         private readonly List<EnemyHealthTracker> _enemyTrackers = new List<EnemyHealthTracker>();
+
+        private bool _playerRandomized;
 
         public string ComponentName { get; }
 
@@ -45,6 +48,15 @@ namespace LiveSplit.Salt
 
             _model.CurrentState.OnStart -= TimerStart;
             _model.CurrentState.OnStart += TimerStart;
+
+            _model.CurrentState.OnStart -= SetPlayerNeedsRandomized;
+            _model.CurrentState.OnStart += SetPlayerNeedsRandomized;
+            _model.CurrentState.OnSplit -= SetPlayerNeedsRandomized;
+            _model.CurrentState.OnSplit += SetPlayerNeedsRandomized;
+            _model.CurrentState.OnUndoSplit -= SetPlayerNeedsRandomized;
+            _model.CurrentState.OnUndoSplit += SetPlayerNeedsRandomized;
+            _model.CurrentState.OnSkipSplit -= SetPlayerNeedsRandomized;
+            _model.CurrentState.OnSkipSplit += SetPlayerNeedsRandomized;
         }
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
@@ -64,6 +76,12 @@ namespace LiveSplit.Salt
             if (_mem.GetGameState() != GameState.Playing)
             {
                 return;
+            }
+
+            if (_settings.RandomizeSkins && !_playerRandomized)
+            {
+                _mem.RandomizePlayerAppearance(0);
+                _playerRandomized = true;
             }
 
             CheckItemSplits();
@@ -145,23 +163,45 @@ namespace LiveSplit.Salt
             _enemyTrackers.Clear();
         }
 
+        private void SetPlayerNeedsRandomized(object sender, EventArgs e)
+        {
+            _playerRandomized = false;
+        }
+
         public Control GetSettingsControl(LayoutMode mode)
         {
-            return null;
+            return _settings;
         }
 
         public XmlNode GetSettings(XmlDocument document)
         {
-            return document.CreateElement("Settings");
+            XmlElement xmlSettings = document.CreateElement("Settings");
+
+            XmlElement rndSkins = document.CreateElement(nameof(Settings.RandomizeSkins));
+            rndSkins.InnerText = _settings.RandomizeSkins.ToString();
+            xmlSettings.AppendChild(rndSkins);
+
+            return xmlSettings;
         }
 
         public void SetSettings(XmlNode settings)
         {
+            XmlNode rndSkinsNode = settings.SelectSingleNode(".//" + nameof(Settings.RandomizeSkins));
+            if (bool.TryParse(rndSkinsNode?.InnerText, out bool rndSkins))
+            {
+                _settings.RandomizeSkins = rndSkins;
+            }
         }
 
         public void Dispose()
         {
             _model.CurrentState.OnStart -= TimerStart;
+
+            _model.CurrentState.OnStart -= SetPlayerNeedsRandomized;
+            _model.CurrentState.OnSplit -= SetPlayerNeedsRandomized;
+            _model.CurrentState.OnUndoSplit -= SetPlayerNeedsRandomized;
+            _model.CurrentState.OnSkipSplit -= SetPlayerNeedsRandomized;
+
             _mem.Dispose();
         }
 

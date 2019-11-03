@@ -56,6 +56,14 @@ namespace LiveSplit.Salt
             return _players.Read<int>(Program, 0x4);
         }
 
+        public IntPtr GetPlayer(int player)
+        {
+            CheckPlayerIndex(player);
+
+            // PlayerMgr.player[player]
+            return (IntPtr) _players.Read<uint>(Program, 0x8 + sizeof(uint) * player);
+        }
+
         public MenuLevel GetMenuLevel(int player)
         {
             CheckPlayerIndex(player);
@@ -125,6 +133,33 @@ namespace LiveSplit.Salt
             UpdateInventory(player);
 
             return _playerItems[player].TryGetValue(itemName, out item);
+        }
+
+        public void RandomizePlayerAppearance(int i)
+        {
+            Random rnd = new Random();
+            IntPtr player = GetPlayer(i);
+
+            // skinIdx (Origin)
+            Program.Write(player, rnd.Next(14), 0xDC);
+
+            // skinClass (Sex)
+            Program.Write(player, rnd.Next(2), 0xE0);
+
+            // hair
+            Program.Write(player, rnd.Next(25), 0xE4);
+
+            // hairColor
+            Program.Write(player, rnd.Next(18), 0xE8);
+
+            // beard
+            Program.Write(player, rnd.Next(11), 0xEC);
+
+            // beardColor
+            Program.Write(player, rnd.Next(18), 0xF0);
+
+            // eyeColor
+            Program.Write(player, rnd.Next(10), 0xF4);
         }
 
         public bool IsGameEnding()

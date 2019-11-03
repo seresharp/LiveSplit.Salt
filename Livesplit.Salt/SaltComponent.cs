@@ -16,8 +16,8 @@ namespace LiveSplit.Salt
         {
             "dice_dread", "dice_cutqueen", "dice_bull", "dice_alchemist", "dice_fauxjester", "dice_dragon",
             "dice_torturetree", "dice_pirate", "dice_inquisitor", "dice_hippogriff", "dice_ruinaxe", "dice_lakewitch",
-            "dice_monster", "dice_squiddragon", "dice_nameless", "dice_leviathon", "dice_cloak", "dice_gasbag",
-            "dice_clay", "dice_mummy", "dice_butterfly"
+            "dice_monster", "dice_squiddragon", "dice_nameless", "dice_cloak", "dice_gasbag", "dice_clay", "dice_mummy",
+            "dice_butterfly", "dice_deadking", "dice_broken"
         };
 
         private readonly TimerModel _model;

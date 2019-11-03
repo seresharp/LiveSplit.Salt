@@ -162,18 +162,28 @@ namespace LiveSplit.Salt
             Program.Write(player, rnd.Next(10), 0xF4);
         }
 
+        public string GetPlayerAnim(int player)
+        {
+            CheckPlayerIndex(player);
+
+            // PlayerMgr.player[0].charIdx
+            int charIndex = _players.Read<int>(Program, 0x8, 0x9C);
+
+            // CharMgr.character[charIndex].anim.animName
+            IntPtr animName = (IntPtr) _characters.Read<uint>(Program, 0x8 + sizeof(uint) * charIndex, 0x4, 0x8);
+
+            return Program.GetString(animName);
+        }
+
         public bool IsGameEnding()
         {
-            // PlayerMgr.player[0].namelessEndFrame
-            bool dominion = _players.Read<float>(Program, 0x8, 0x138) > 0;
-
             // PlayerMgr.player[0].charIdx
             int charIndex = _players.Read<int>(Program, 0x8, 0x9C);
 
             // CharMgr.character[charIndex].loc.Y
             float charY = _characters.Read<float>(Program, 0x8 + sizeof(uint) * charIndex, 0xD8);
 
-            return dominion || charY > 47900;
+            return GetPlayerAnim(0) == "takehead" || charY > 47900;
         }
 
         public GameState GetGameState()

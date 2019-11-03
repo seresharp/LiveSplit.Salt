@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace LiveSplit.Salt
 {
@@ -13,8 +14,19 @@ namespace LiveSplit.Salt
                 mem.Hook();
             }
 
-            mem.IsGameEnding();
-            Console.ReadLine();
+            string anim = mem.GetPlayerAnim(0);
+
+            while (true)
+            {
+                Thread.Sleep(10);
+                string newAnim = mem.GetPlayerAnim(0);
+
+                if (anim != newAnim)
+                {
+                    anim = newAnim;
+                    Console.WriteLine(anim);
+                }
+            }
         }
     }
 }
